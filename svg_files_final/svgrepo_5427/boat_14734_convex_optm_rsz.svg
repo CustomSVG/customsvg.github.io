@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 224 224">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #d17c44;
+        opacity: 1;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        isolation: isolate;
+      }
+
+      .cls-2 {
+        fill: #d6d6d6;
+        opacity: 1;
+      }
+
+      .cls-3 {
+        fill: #67615f;
+        opacity: 1;
+      }
+
+      .cls-4 {
+        fill: #626162;
+        opacity: 1;
+      }
+
+      .cls-5 {
+        fill: #cb7b44;
+        opacity: 1;
+      }
+    </style>
+  </defs>
+  <!-- Generator: Adobe Illustrator 28.6.0, SVG Export Plug-In . SVG Version: 1.2.0 Build 709)  -->
+  <g>
+    <g id="_图层_1" data-name="图层_1">
+      <g>
+        <path class="cls-4" d="M111.9,101.9c10.7-10.2,28.1-21,39.7-24.9l2.3-.7.3,30.8h-24.1s-24.2.4-24.2.4l6-5.7"/>
+        <path class="cls-2" d="M28.9,115.9c-.8-2.8-.9-5.4-.5-6.4.8-.6,27.2-1.4,85.2-2.5h40.8s0-30.5,0-30.5l11.8.6c13.3.5,12.4,0,19,13.5,3.8,7.8,7.4,18.4,9.1,26.8l.7,3.2H30c0-.1-1-4.7-1-4.7"/>
+        <path class="cls-1" d="M34.1,138.1c-.5-2-1.5-5.8-1.8-8.7-.8-3-1.4-6-1.7-7.2-.4-1.5,4-1.4,82.5-1.5h82.9c0,0,0,20.8,0,20.8l-160.8.7-1-4.1"/>
+        <path class="cls-5" d="M163.6,100.6v-4.8c0,0,15.7.2,15.7.2v9.3s-15.8,0-15.8,0v-4.6"/>
+        <path class="cls-3" d="M35.1,146.5c-1.7-4.6-5.7-4.6,80-4.8h80.7c0,0,0,5.7,0,5.7h-80.3c-72.1.2-80,.1-80.5-.9"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,2865 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SVG Display</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f0f0f0;
+        flex-direction: column;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        justify-content: flex-start; /* 使用flex-start确保内容从顶部开始 */
+        margin-top: 20px;
+        overflow-y: auto; /* 允许在垂直方向滚动 */
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* 允许换行 */
+      }
+      /* 面板的标题 */
+      .panel-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center; /* 标题居中对齐 */
+      }
+      /* 面板的背景 */
+      .panel {
+        background-color: #f5f5f5; /* 浅灰色背景 */
+        border-radius: 8px;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      /* 左侧面板：grid布局，每行4个svg */
+      .left-panel-wrapper {
+        width: 23%; /* 左侧面板占据的宽度 */
+        height: 100%; /* 高度与右侧面板一致 */
+      }
+      .left-panel {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* grid布局，最多2列 */
+        gap: 10px;
+        align-items: center;
+      }
+      /* 右侧面板：flex布局，每行最多5个svg */
+      .right-panel-wrapper {
+        width: 73%; /* 右侧面板占据的宽度 */
+        height: 100%; /* 高度与左侧面板一致 */
+        display: flex;
+        flex-direction: column;
+      }
+      .right-panel {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      .svg-item {
+        width: 90px; /* 控制每个SVG显示的宽度，保持一致 */
+        margin: 10px;
+        text-align: center;
+        flex-shrink: 0; /* 防止图片被压缩 */
+      }
+      /* 左侧面板中的 SVG 大小 */
+      .left-panel .svg-item img {
+        max-width: 50px; /* 设置左侧面板SVG的大小为50px */
+        height: auto;
+      }
+      /* 右侧面板中的 SVG 大小 */
+      .right-panel .svg-item img {
+        max-width: 100px; /* 设置右侧面板SVG的大小为100px */
+        height: auto;
+      }
+      .text-item {
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+      .pagination {
+        margin-top: 20px;
+        padding-bottom: 20px;
+        display: flex;
+        justify-content: center;
+      }
+      .pagination button {
+        margin: 0 5px;
+      }
+      .pagination button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="container">
+      <!-- Rows will be dynamically inserted here -->
+    </div>
+
+    <div class="pagination" id="pagination">
+      <!-- Pagination buttons will be dynamically inserted here -->
+    </div>
+
+    <script>
+      const svgData = {
+        6002: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/titanic_83337_convex_optm_rsz.svg",
+              name: "titanic",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/A police car with flashing lights_17919_convex_optm_rsz.svg",
+              name: "A police car with flashing lights",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/mushroom_14773_convex_optm_rsz.svg",
+              name: "mushroom",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/bus_32237_convex_optm_rsz.svg",
+              name: "bus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/compass_49306_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/camera_61845_convex_optm_rsz.svg",
+              name: "camera",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/laptop_42833_convex_optm_rsz.svg",
+              name: "laptop",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/411118_burn_diffvg_rsz.svg",
+              name: "411118_burn",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/411348_aid_diffvg_rsz.svg",
+              name: "411348_aid",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/411220_locate_diffvg_rsz.svg",
+              name: "411220_locate",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6002/411299_spread_diffvg_rsz.svg",
+              name: "411299_spread",
+            },
+          ],
+        },
+        5810: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/banana_10028_convex_optm_rsz.svg",
+              name: "banana",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/submarine_80821_convex_optm_rsz.svg",
+              name: "submarine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/espresso machine_85790_convex_optm_rsz.svg",
+              name: "espresso machine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/food_55001_convex_optm_rsz.svg",
+              name: "food",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/horse_97425_convex_optm_rsz.svg",
+              name: "horse",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/food_54998_convex_optm_rsz.svg",
+              name: "food",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/cactus_69824_convex_optm_rsz.svg",
+              name: "cactus",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384683_account-avatar-profile-user-8_diffvg_rsz.svg",
+              name: "384683_account-avatar-profile-user-8",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384682_account-avatar-profile-user-10_diffvg_rsz.svg",
+              name: "384682_account-avatar-profile-user-10",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384670_account-avatar-profile-user_diffvg_rsz.svg",
+              name: "384670_account-avatar-profile-user",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384681_account-avatar-profile-user-16_diffvg_rsz.svg",
+              name: "384681_account-avatar-profile-user-16",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384684_account-avatar-profile-user-15_diffvg_rsz.svg",
+              name: "384684_account-avatar-profile-user-15",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384672_account-avatar-profile-user-7_diffvg_rsz.svg",
+              name: "384672_account-avatar-profile-user-7",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5810/384674_account-avatar-profile-user-11_diffvg_rsz.svg",
+              name: "384674_account-avatar-profile-user-11",
+            },
+          ],
+        },
+        5484: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/America_13679_convex_optm_rsz.svg",
+              name: "America",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/A penguin dressed in a tiny bow tie_29425_convex_optm_rsz.svg",
+              name: "A penguin dressed in a tiny bow tie",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/ancient village_57603_convex_optm_rsz.svg",
+              name: "ancient village",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/bookshelf_20019_convex_optm_rsz.svg",
+              name: "bookshelf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/castle_46816_convex_optm_rsz.svg",
+              name: "castle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/jacket_52412_convex_optm_rsz.svg",
+              name: "jacket",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/jacket_19225_convex_optm_rsz.svg",
+              name: "jacket",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327777_toolbox-repair-box-tool-box-toolboxes-toolkit-tools-equipment_diffvg_rsz.svg",
+              name: "327777_toolbox-repair-box-tool-box-toolboxes-toolkit-tools-equipment",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327786_eyeglasses-eyeglasess-construction-equipment-safety-eyewear_diffvg_rsz.svg",
+              name: "327786_eyeglasses-eyeglasess-construction-equipment-safety-eyewear",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327798_screwdriver-tools-construction-flathead-repair-tool-equipment_diffvg_rsz.svg",
+              name: "327798_screwdriver-tools-construction-flathead-repair-tool-equipment",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327790_knife-cutter-cut-cutlery-cutting-tools_diffvg_rsz.svg",
+              name: "327790_knife-cutter-cut-cutlery-cutting-tools",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327778_wrench-tools-configuration-setting-settings-repair_diffvg_rsz.svg",
+              name: "327778_wrench-tools-configuration-setting-settings-repair",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5484/327780_bolt-screw-building-construction-nails-repair-tool_diffvg_rsz.svg",
+              name: "327780_bolt-screw-building-construction-nails-repair-tool",
+            },
+          ],
+        },
+        5288: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/owl_27811_convex_optm_rsz.svg",
+              name: "owl",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/A stop sign with a large tree behind it_11095_convex_optm_rsz.svg",
+              name: "A stop sign with a large tree behind it",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/mountain stream_24132_convex_optm_rsz.svg",
+              name: "mountain stream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/rainbow_46249_convex_optm_rsz.svg",
+              name: "rainbow",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/Pho_56548_convex_optm_rsz.svg",
+              name: "Pho",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/owl_60048_convex_optm_rsz.svg",
+              name: "owl",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/phoenix_39866_convex_optm_rsz.svg",
+              name: "phoenix",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/304713_hand-one-gesture_diffvg_rsz.svg",
+              name: "304713_hand-one-gesture",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/304717_podium-3-winners_diffvg_rsz.svg",
+              name: "304717_podium-3-winners",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/304731_basketball-winner_diffvg_rsz.svg",
+              name: "304731_basketball-winner",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5288/304700_money_diffvg_rsz.svg",
+              name: "304700_money",
+            },
+          ],
+        },
+        6207: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/Statue of Liberty_95261_convex_optm_rsz.svg",
+              name: "Statue of Liberty",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/camera_85994_convex_optm_rsz.svg",
+              name: "camera",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/snail_49734_convex_optm_rsz.svg",
+              name: "snail",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/headphones_76986_convex_optm_rsz.svg",
+              name: "headphones",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/Empire State Building_81472_convex_optm_rsz.svg",
+              name: "Empire State Building",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/headphones_17744_convex_optm_rsz.svg",
+              name: "headphones",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/dog chef_24218_convex_optm_rsz.svg",
+              name: "dog chef",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420865_box-delivery-package-19_diffvg_rsz.svg",
+              name: "420865_box-delivery-package-19",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420887_delivery-package-shipping-3_diffvg_rsz.svg",
+              name: "420887_delivery-package-shipping-3",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420919_headset-headphone-earphone_diffvg_rsz.svg",
+              name: "420919_headset-headphone-earphone",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420893_arrow-computer-disk_diffvg_rsz.svg",
+              name: "420893_arrow-computer-disk",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420909_computer-cpu-hardware_diffvg_rsz.svg",
+              name: "420909_computer-cpu-hardware",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420869_box-delivery-fragile_diffvg_rsz.svg",
+              name: "420869_box-delivery-fragile",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420877_box-delivery-package-10_diffvg_rsz.svg",
+              name: "420877_box-delivery-package-10",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6207/420892_arrow-computer-disk-2_diffvg_rsz.svg",
+              name: "420892_arrow-computer-disk-2",
+            },
+          ],
+        },
+        6774: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/bookshelf_37380_convex_optm_rsz.svg",
+              name: "bookshelf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/compas_73829_convex_optm_rsz.svg",
+              name: "compas",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/erupting volcano_27859_convex_optm_rsz.svg",
+              name: "erupting volcano",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/frog_73333_convex_optm_rsz.svg",
+              name: "frog",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/shield_20763_convex_optm_rsz.svg",
+              name: "shield",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/cat_92044_convex_optm_rsz.svg",
+              name: "cat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/apple_30327_convex_optm_rsz.svg",
+              name: "apple",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/486333_baseball_diffvg_rsz.svg",
+              name: "486333_baseball",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/486339_boxing-gloves_diffvg_rsz.svg",
+              name: "486339_boxing-gloves",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/486325_weighing-scale_diffvg_rsz.svg",
+              name: "486325_weighing-scale",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6774/486324_oxygen-cylinder_diffvg_rsz.svg",
+              name: "486324_oxygen-cylinder",
+            },
+          ],
+        },
+        6512: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/camera_38704_convex_optm_rsz.svg",
+              name: "camera",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/crab_32932_convex_optm_rsz.svg",
+              name: "crab",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/chimpanzee_87189_convex_optm_rsz.svg",
+              name: "chimpanzee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/clock_20243_convex_optm_rsz.svg",
+              name: "clock",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/fox_70468_convex_optm_rsz.svg",
+              name: "fox",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/avocados_44805_convex_optm_rsz.svg",
+              name: "avocados",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/fox_70467_convex_optm_rsz.svg",
+              name: "fox",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429765_banana-blackbarry-blackberries_diffvg_rsz.svg",
+              name: "429765_banana-blackbarry-blackberries",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429782_apple-apples-fruit_diffvg_rsz.svg",
+              name: "429782_apple-apples-fruit",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429768_ameixa-fruit-plum_diffvg_rsz.svg",
+              name: "429768_ameixa-fruit-plum",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429771_fruit-laranja-orange_diffvg_rsz.svg",
+              name: "429771_fruit-laranja-orange",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429783_fruit-graps-uvas_diffvg_rsz.svg",
+              name: "429783_fruit-graps-uvas",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429769_coco-coconut-coconuts_diffvg_rsz.svg",
+              name: "429769_coco-coconut-coconuts",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429781_fruit-pear-pears_diffvg_rsz.svg",
+              name: "429781_fruit-pear-pears",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6512/429779_abacaxi-fruit-pineapple_diffvg_rsz.svg",
+              name: "429779_abacaxi-fruit-pineapple",
+            },
+          ],
+        },
+        5355: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/clock_17363_convex_optm_rsz.svg",
+              name: "clock",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/boat_96761_convex_optm_rsz.svg",
+              name: "boat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/A bus covered with assorted colorful giraffe on the side of it_73608_convex_optm_rsz.svg",
+              name: "A bus covered with assorted colorful giraffe on the side of it",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/An erupting volcano, aerial view_82302_convex_optm_rsz.svg",
+              name: "An erupting volcano, aerial view",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/futuristic robot_65690_convex_optm_rsz.svg",
+              name: "futuristic robot",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/An erupting volcano, aerial view_72520_convex_optm_rsz.svg",
+              name: "An erupting volcano, aerial view",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/Statue of Liberty_44968_convex_optm_rsz.svg",
+              name: "Statue of Liberty",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314972_winning_diffvg_rsz.svg",
+              name: "314972_winning",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314974_wallet-with-money_diffvg_rsz.svg",
+              name: "314974_wallet-with-money",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314993_receipt_diffvg_rsz.svg",
+              name: "314993_receipt",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314982_park-sunny_diffvg_rsz.svg",
+              name: "314982_park-sunny",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314985_song-cd_diffvg_rsz.svg",
+              name: "314985_song-cd",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314979_shipment-shipping_diffvg_rsz.svg",
+              name: "314979_shipment-shipping",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5355/314981_key-detailed_diffvg_rsz.svg",
+              name: "314981_key-detailed",
+            },
+          ],
+        },
+        6524: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/compas_96369_convex_optm_rsz.svg",
+              name: "compas",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/crab_23133_convex_optm_rsz.svg",
+              name: "crab",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/mouse_96952_convex_optm_rsz.svg",
+              name: "mouse",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/elephant_80886_convex_optm_rsz.svg",
+              name: "elephant",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/car_52395_convex_optm_rsz.svg",
+              name: "car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/elephant_80890_convex_optm_rsz.svg",
+              name: "elephant",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/chimpanzee_17823_convex_optm_rsz.svg",
+              name: "chimpanzee",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/430027_blue-whale_diffvg_rsz.svg",
+              name: "430027_blue-whale",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/430039_centipede-40514_diffvg_rsz.svg",
+              name: "430039_centipede-40514",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/430049_atlas-beetle_diffvg_rsz.svg",
+              name: "430049_atlas-beetle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6524/430046_apatosaurus_diffvg_rsz.svg",
+              name: "430046_apatosaurus",
+            },
+          ],
+        },
+        5331: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/bee_87988_convex_optm_rsz.svg",
+              name: "bee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/giraffe_53422_convex_optm_rsz.svg",
+              name: "giraffe",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/stork_98667_convex_optm_rsz.svg",
+              name: "stork",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/calendar_10325_convex_optm_rsz.svg",
+              name: "calendar",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/cottage_79969_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/astronaut_97311_convex_optm_rsz.svg",
+              name: "astronaut",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/trophy_31962_convex_optm_rsz.svg",
+              name: "trophy",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/313158_print_diffvg_rsz.svg",
+              name: "313158_print",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/313148_more_diffvg_rsz.svg",
+              name: "313148_more",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/313182_bookmark-minus_diffvg_rsz.svg",
+              name: "313182_bookmark-minus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5331/313115_check_diffvg_rsz.svg",
+              name: "313115_check",
+            },
+          ],
+        },
+        5558: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/pirate ship_61436_convex_optm_rsz.svg",
+              name: "pirate ship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/roulette wheel_85584_convex_optm_rsz.svg",
+              name: "roulette wheel",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/macaw_21347_convex_optm_rsz.svg",
+              name: "macaw",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/phone_52923_convex_optm_rsz.svg",
+              name: "phone",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/bus_36122_convex_optm_rsz.svg",
+              name: "bus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/police car_19099_convex_optm_rsz.svg",
+              name: "police car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/Fast Food_89044_convex_optm_rsz.svg",
+              name: "Fast Food",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/341548_ramen-box-japanese-cuisine_diffvg_rsz.svg",
+              name: "341548_ramen-box-japanese-cuisine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/341540_yakitori-skewered-chicken-grilled-japanese-satay-japanese-cuisine_diffvg_rsz.svg",
+              name: "341540_yakitori-skewered-chicken-grilled-japanese-satay-japanese-cuisine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/341544_gyoza-dumpling-japanese-food-steamed_diffvg_rsz.svg",
+              name: "341544_gyoza-dumpling-japanese-food-steamed",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5558/341551_sake-alcohol-japanese_diffvg_rsz.svg",
+              name: "341551_sake-alcohol-japanese",
+            },
+          ],
+        },
+        6728: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/lawnmower_58137_convex_optm_rsz.svg",
+              name: "lawnmower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/car_91774_convex_optm_rsz.svg",
+              name: "car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/headphones_66617_convex_optm_rsz.svg",
+              name: "headphones",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/mountain stream_11811_convex_optm_rsz.svg",
+              name: "mountain stream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/city intersection_87794_convex_optm_rsz.svg",
+              name: "city intersection",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/harbor_53835_convex_optm_rsz.svg",
+              name: "harbor",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/avocado chair_89622_convex_optm_rsz.svg",
+              name: "avocado chair",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475545_popsicle_diffvg_rsz.svg",
+              name: "475545_popsicle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475555_convenience-store_diffvg_rsz.svg",
+              name: "475555_convenience-store",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475534_coffee_diffvg_rsz.svg",
+              name: "475534_coffee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475550_newspaper_diffvg_rsz.svg",
+              name: "475550_newspaper",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475526_clothing-store_diffvg_rsz.svg",
+              name: "475526_clothing-store",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475518_repair-shop_diffvg_rsz.svg",
+              name: "475518_repair-shop",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475521_arcade_diffvg_rsz.svg",
+              name: "475521_arcade",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475529_cinema_diffvg_rsz.svg",
+              name: "475529_cinema",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475516_internet-cafe_diffvg_rsz.svg",
+              name: "475516_internet-cafe",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6728/475542_beer_diffvg_rsz.svg",
+              name: "475542_beer",
+            },
+          ],
+        },
+        6184: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/marketplace_35653_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/bank_69796_convex_optm_rsz.svg",
+              name: "bank",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/bank_69792_convex_optm_rsz.svg",
+              name: "bank",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/cake_82074_convex_optm_rsz.svg",
+              name: "cake",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/cake_82076_convex_optm_rsz.svg",
+              name: "cake",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/marketplace_35651_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/dog_99684_convex_optm_rsz.svg",
+              name: "dog",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/420003_list-schedule-suggestions_diffvg_rsz.svg",
+              name: "420003_list-schedule-suggestions",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/420004_content-exclusive-new_diffvg_rsz.svg",
+              name: "420004_content-exclusive-new",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/420009_content-on-demand-play_diffvg_rsz.svg",
+              name: "420009_content-on-demand-play",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6184/420010_content-online-streaming_diffvg_rsz.svg",
+              name: "420010_content-online-streaming",
+            },
+          ],
+        },
+        6974: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/sailboat_26397_convex_optm_rsz.svg",
+              name: "sailboat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/cat_88234_convex_optm_rsz.svg",
+              name: "cat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/city intersection_71942_convex_optm_rsz.svg",
+              name: "city intersection",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/cottage_52523_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/cottage_52520_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/cottage_52518_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/house_29820_convex_optm_rsz.svg",
+              name: "house",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/530185_penguin_diffvg_rsz.svg",
+              name: "530185_penguin",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/530186_the-cow_diffvg_rsz.svg",
+              name: "530186_the-cow",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/530182_crab_diffvg_rsz.svg",
+              name: "530182_crab",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6974/530196_crocodile_diffvg_rsz.svg",
+              name: "530196_crocodile",
+            },
+          ],
+        },
+        6162: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/espresso machine_83078_convex_optm_rsz.svg",
+              name: "espresso machine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/box_29332_convex_optm_rsz.svg",
+              name: "box",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/espresso machine_83074_convex_optm_rsz.svg",
+              name: "espresso machine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/sailboat_82903_convex_optm_rsz.svg",
+              name: "sailboat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/donut_48773_convex_optm_rsz.svg",
+              name: "donut",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/calendar_61088_convex_optm_rsz.svg",
+              name: "calendar",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/Sydney Opera House_89640_convex_optm_rsz.svg",
+              name: "Sydney Opera House",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/419334_altar-and-architecture_diffvg_rsz.svg",
+              name: "419334_altar-and-architecture",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/419330_angel-artistic-cemetery_diffvg_rsz.svg",
+              name: "419330_angel-artistic-cemetery",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/419326_and-flags-location_diffvg_rsz.svg",
+              name: "419326_and-flags-location",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6162/419313_cards-entertainment-funeral_diffvg_rsz.svg",
+              name: "419313_cards-entertainment-funeral",
+            },
+          ],
+        },
+        6995: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/whale_48812_convex_optm_rsz.svg",
+              name: "whale",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/compass_20329_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/spaceship_96884_convex_optm_rsz.svg",
+              name: "spaceship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/bench_12851_convex_optm_rsz.svg",
+              name: "bench",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/crown_56305_convex_optm_rsz.svg",
+              name: "crown",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/tennis court_10657_convex_optm_rsz.svg",
+              name: "tennis court",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/snail_47907_convex_optm_rsz.svg",
+              name: "snail",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/530569_towel_diffvg_rsz.svg",
+              name: "530569_towel",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/530561_toothpaste_diffvg_rsz.svg",
+              name: "530561_toothpaste",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/530559_sink_diffvg_rsz.svg",
+              name: "530559_sink",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6995/530556_tub_diffvg_rsz.svg",
+              name: "530556_tub",
+            },
+          ],
+        },
+        6705: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/calendar_56099_convex_optm_rsz.svg",
+              name: "calendar",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/trash bin_85496_convex_optm_rsz.svg",
+              name: "trash bin",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/spaghetti_74254_convex_optm_rsz.svg",
+              name: "spaghetti",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/globe_96782_convex_optm_rsz.svg",
+              name: "globe",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/octopus_89096_convex_optm_rsz.svg",
+              name: "octopus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/ladder_69978_convex_optm_rsz.svg",
+              name: "ladder",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/sloth_73839_convex_optm_rsz.svg",
+              name: "sloth",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/474488_folder_diffvg_rsz.svg",
+              name: "474488_folder",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/474484_coffee_diffvg_rsz.svg",
+              name: "474484_coffee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/474491_mouse_diffvg_rsz.svg",
+              name: "474491_mouse",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6705/474485_digital-tablet_diffvg_rsz.svg",
+              name: "474485_digital-tablet",
+            },
+          ],
+        },
+        5725: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/mountain stream_38617_convex_optm_rsz.svg",
+              name: "mountain stream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/train_40501_convex_optm_rsz.svg",
+              name: "train",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/banana_76314_convex_optm_rsz.svg",
+              name: "banana",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/A spaceship flying in a starry night sky_47095_convex_optm_rsz.svg",
+              name: "A spaceship flying in a starry night sky",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/cello_12023_convex_optm_rsz.svg",
+              name: "cello",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/bus_46697_convex_optm_rsz.svg",
+              name: "bus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/cherry_85598_convex_optm_rsz.svg",
+              name: "cherry",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/381263_park-bench-winter-snowy_diffvg_rsz.svg",
+              name: "381263_park-bench-winter-snowy",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/381267_label-price-snowflake-tag_diffvg_rsz.svg",
+              name: "381267_label-price-snowflake-tag",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/381264_snow-shovel-winter-equipment_diffvg_rsz.svg",
+              name: "381264_snow-shovel-winter-equipment",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5725/381268_claus-santa-xmas-christmas_diffvg_rsz.svg",
+              name: "381268_claus-santa-xmas-christmas",
+            },
+          ],
+        },
+        6882: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/vase_81173_convex_optm_rsz.svg",
+              name: "vase",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/building_88343_convex_optm_rsz.svg",
+              name: "building",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/hamburger_14787_convex_optm_rsz.svg",
+              name: "hamburger",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/A great gray owl with a mouse in its beak_93154_convex_optm_rsz.svg",
+              name: "A great gray owl with a mouse in its beak",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/clock tower_57307_convex_optm_rsz.svg",
+              name: "clock tower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/torii gate_57671_convex_optm_rsz.svg",
+              name: "torii gate",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/giraffe_43565_convex_optm_rsz.svg",
+              name: "giraffe",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/503889_biscuit_diffvg_rsz.svg",
+              name: "503889_biscuit",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/503902_ice-cream_diffvg_rsz.svg",
+              name: "503902_ice-cream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/503904_coffee_diffvg_rsz.svg",
+              name: "503904_coffee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6882/503894_hamburger_diffvg_rsz.svg",
+              name: "503894_hamburger",
+            },
+          ],
+        },
+        6213: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/apple_30026_convex_optm_rsz.svg",
+              name: "apple",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/A penguin dressed in a tiny bow tie_84343_convex_optm_rsz.svg",
+              name: "A penguin dressed in a tiny bow tie",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/cake_10172_convex_optm_rsz.svg",
+              name: "cake",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/An erupting volcano, aerial view_88783_convex_optm_rsz.svg",
+              name: "An erupting volcano, aerial view",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/chimpanzee_14902_convex_optm_rsz.svg",
+              name: "chimpanzee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/donut_97936_convex_optm_rsz.svg",
+              name: "donut",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/police car_38962_convex_optm_rsz.svg",
+              name: "police car",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/421023_bag-gift-paper_diffvg_rsz.svg",
+              name: "421023_bag-gift-paper",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/421025_celebrate-gifts-happy_diffvg_rsz.svg",
+              name: "421025_celebrate-gifts-happy",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/421027_card-gift-present_diffvg_rsz.svg",
+              name: "421027_card-gift-present",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6213/421029_bag-gift-pesent_diffvg_rsz.svg",
+              name: "421029_bag-gift-pesent",
+            },
+          ],
+        },
+        5694: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/castle_35499_convex_optm_rsz.svg",
+              name: "castle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/Vincent van Gogh_41720_convex_optm_rsz.svg",
+              name: "Vincent van Gogh",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/pirate_97956_convex_optm_rsz.svg",
+              name: "pirate",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/astronaut riding a horse_40731_convex_optm_rsz.svg",
+              name: "astronaut riding a horse",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/sakura tree_17783_convex_optm_rsz.svg",
+              name: "sakura tree",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/flower_80352_convex_optm_rsz.svg",
+              name: "flower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/cactus_77412_convex_optm_rsz.svg",
+              name: "cactus",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/380277_crystal-ball-magic-magician-witch_diffvg_rsz.svg",
+              name: "380277_crystal-ball-magic-magician-witch",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/380318_character-costume-ghost-halloween-horror_diffvg_rsz.svg",
+              name: "380318_character-costume-ghost-halloween-horror",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/380288_fairy-fantasy-horn-legend-satyr_diffvg_rsz.svg",
+              name: "380288_fairy-fantasy-horn-legend-satyr",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5694/380287_fear-halloween-horror-mummy-scary_diffvg_rsz.svg",
+              name: "380287_fear-halloween-horror-mummy-scary",
+            },
+          ],
+        },
+        6867: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/pig_20659_convex_optm_rsz.svg",
+              name: "pig",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/leaf_18822_convex_optm_rsz.svg",
+              name: "leaf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/harbor_24019_convex_optm_rsz.svg",
+              name: "harbor",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/cake_95469_convex_optm_rsz.svg",
+              name: "cake",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/hamburger_37151_convex_optm_rsz.svg",
+              name: "hamburger",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/Superhero_72039_convex_optm_rsz.svg",
+              name: "Superhero",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/motorcycle_28337_convex_optm_rsz.svg",
+              name: "motorcycle",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501914_wine-glass_diffvg_rsz.svg",
+              name: "501914_wine-glass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501918_movie_diffvg_rsz.svg",
+              name: "501918_movie",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501912_chocolate_diffvg_rsz.svg",
+              name: "501912_chocolate",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501913_have-a-meal_diffvg_rsz.svg",
+              name: "501913_have-a-meal",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501909_condom_diffvg_rsz.svg",
+              name: "501909_condom",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501904_envelope_diffvg_rsz.svg",
+              name: "501904_envelope",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6867/501919_candle_diffvg_rsz.svg",
+              name: "501919_candle",
+            },
+          ],
+        },
+        5427: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/dragon_69192_convex_optm_rsz.svg",
+              name: "dragon",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/piano_38420_convex_optm_rsz.svg",
+              name: "piano",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/crab_64351_convex_optm_rsz.svg",
+              name: "crab",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/chimpanzee_47094_convex_optm_rsz.svg",
+              name: "chimpanzee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/bookshelf_90237_convex_optm_rsz.svg",
+              name: "bookshelf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/chimpanzee_47092_convex_optm_rsz.svg",
+              name: "chimpanzee",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/A smiling sloth wearing a leather jacket, a cowboy hat and a kilt_40319_convex_optm_rsz.svg",
+              name: "A smiling sloth wearing a leather jacket, a cowboy hat and a kilt",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/324069_water_diffvg_rsz.svg",
+              name: "324069_water",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/324072_apple-ecology_diffvg_rsz.svg",
+              name: "324072_apple-ecology",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/324044_potion_diffvg_rsz.svg",
+              name: "324044_potion",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5427/323996_eyes_diffvg_rsz.svg",
+              name: "323996_eyes",
+            },
+          ],
+        },
+        6856: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/Sydney Opera House_37579_convex_optm_rsz.svg",
+              name: "Sydney Opera House",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/cello_14397_convex_optm_rsz.svg",
+              name: "cello",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/parrot_30891_convex_optm_rsz.svg",
+              name: "parrot",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/elephant_15770_convex_optm_rsz.svg",
+              name: "elephant",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/ancient village_41506_convex_optm_rsz.svg",
+              name: "ancient village",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/A smiling sloth wearing a leather jacket, a cowboy hat and a kilt_14228_convex_optm_rsz.svg",
+              name: "A smiling sloth wearing a leather jacket, a cowboy hat and a kilt",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/sakura tree_18624_convex_optm_rsz.svg",
+              name: "sakura tree",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/500028_cable-car_diffvg_rsz.svg",
+              name: "500028_cable-car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/500027_wine-bottle_diffvg_rsz.svg",
+              name: "500027_wine-bottle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/500033_umbrella_diffvg_rsz.svg",
+              name: "500033_umbrella",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6856/500017_pen_diffvg_rsz.svg",
+              name: "500017_pen",
+            },
+          ],
+        },
+        5417: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/phone laptop_87358_convex_optm_rsz.svg",
+              name: "phone laptop",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/coconut_70692_convex_optm_rsz.svg",
+              name: "coconut",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/Earth_85593_convex_optm_rsz.svg",
+              name: "Earth",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/Eiffel Tower_41540_convex_optm_rsz.svg",
+              name: "Eiffel Tower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/marketplace_58850_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/harbor_75074_convex_optm_rsz.svg",
+              name: "harbor",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/harbor_75077_convex_optm_rsz.svg",
+              name: "harbor",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/318589_tooth-paste_diffvg_rsz.svg",
+              name: "318589_tooth-paste",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/318529_dentist-tool_diffvg_rsz.svg",
+              name: "318529_dentist-tool",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/318557_syringe-blue_diffvg_rsz.svg",
+              name: "318557_syringe-blue",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5417/318545_love-teeth_diffvg_rsz.svg",
+              name: "318545_love-teeth",
+            },
+          ],
+        },
+        5967: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/marketplace_28635_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/compass_53096_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/marketplace_28636_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/truck_71787_convex_optm_rsz.svg",
+              name: "truck",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/margarita_76679_convex_optm_rsz.svg",
+              name: "margarita",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/America_18527_convex_optm_rsz.svg",
+              name: "America",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/globe_28650_convex_optm_rsz.svg",
+              name: "globe",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408278_cookie-cooking-ginger-kitchen-man_diffvg_rsz.svg",
+              name: "408278_cookie-cooking-ginger-kitchen-man",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408275_bakery-bread-cake-candy-sweet-wheat_diffvg_rsz.svg",
+              name: "408275_bakery-bread-cake-candy-sweet-wheat",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408280_bakery-bread-cooking-food-healty-restaurant_diffvg_rsz.svg",
+              name: "408280_bakery-bread-cooking-food-healty-restaurant",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408286_cake-cooking-food-restaurant-sweet_diffvg_rsz.svg",
+              name: "408286_cake-cooking-food-restaurant-sweet",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408284_bakery-bread-cake-fruit-pastry-sweet_diffvg_rsz.svg",
+              name: "408284_bakery-bread-cake-fruit-pastry-sweet",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408277_cookie-cream-dessert-donut-sweet_diffvg_rsz.svg",
+              name: "408277_cookie-cream-dessert-donut-sweet",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408283_biscuit-candy-cookie-food-sweet_diffvg_rsz.svg",
+              name: "408283_biscuit-candy-cookie-food-sweet",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5967/408285_cookie-cooking-cupcake-dessert-food-meal_diffvg_rsz.svg",
+              name: "408285_cookie-cooking-cupcake-dessert-food-meal",
+            },
+          ],
+        },
+        6715: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/dog chef_76935_convex_optm_rsz.svg",
+              name: "dog chef",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/hamburger_26369_convex_optm_rsz.svg",
+              name: "hamburger",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/astronaut on Mars_90968_convex_optm_rsz.svg",
+              name: "astronaut on Mars",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/The Great Wall_46427_convex_optm_rsz.svg",
+              name: "The Great Wall",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/marketplace_30501_convex_optm_rsz.svg",
+              name: "marketplace",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/Fire_74497_convex_optm_rsz.svg",
+              name: "Fire",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/bus_62780_convex_optm_rsz.svg",
+              name: "bus",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/475082_microwave_diffvg_rsz.svg",
+              name: "475082_microwave",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/475069_building-small_diffvg_rsz.svg",
+              name: "475069_building-small",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/475095_bed-single_diffvg_rsz.svg",
+              name: "475095_bed-single",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6715/475068_chair-dining_diffvg_rsz.svg",
+              name: "475068_chair-dining",
+            },
+          ],
+        },
+        5903: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/ship_68592_convex_optm_rsz.svg",
+              name: "ship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/Alamo_41206_convex_optm_rsz.svg",
+              name: "Alamo",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/beer_64658_convex_optm_rsz.svg",
+              name: "beer",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/astronaut_96810_convex_optm_rsz.svg",
+              name: "astronaut",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/pirate ship_17363_convex_optm_rsz.svg",
+              name: "pirate ship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/beer_26293_convex_optm_rsz.svg",
+              name: "beer",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/submarine_36253_convex_optm_rsz.svg",
+              name: "submarine",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/393901_avatar-1_diffvg_rsz.svg",
+              name: "393901_avatar-1",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/393907_avatar-4_diffvg_rsz.svg",
+              name: "393907_avatar-4",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/393912_avatar-11_diffvg_rsz.svg",
+              name: "393912_avatar-11",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5903/393897_avatar-18_diffvg_rsz.svg",
+              name: "393897_avatar-18",
+            },
+          ],
+        },
+        6740: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/salmon_96969_convex_optm_rsz.svg",
+              name: "salmon",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/motorcycle_61847_convex_optm_rsz.svg",
+              name: "motorcycle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/leaf_98767_convex_optm_rsz.svg",
+              name: "leaf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/ladder_91092_convex_optm_rsz.svg",
+              name: "ladder",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/bank_39887_convex_optm_rsz.svg",
+              name: "bank",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/compas_22199_convex_optm_rsz.svg",
+              name: "compas",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/pancake_38065_convex_optm_rsz.svg",
+              name: "pancake",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/476925_quest_diffvg_rsz.svg",
+              name: "476925_quest",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/476920_roller-coaster_diffvg_rsz.svg",
+              name: "476920_roller-coaster",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/476859_colosseum_diffvg_rsz.svg",
+              name: "476859_colosseum",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6740/476946_ticket_diffvg_rsz.svg",
+              name: "476946_ticket",
+            },
+          ],
+        },
+        6700: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/submarine_32090_convex_optm_rsz.svg",
+              name: "submarine",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/backpack_67513_convex_optm_rsz.svg",
+              name: "backpack",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/cactus_11067_convex_optm_rsz.svg",
+              name: "cactus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/house_83945_convex_optm_rsz.svg",
+              name: "house",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/compass_88281_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/leaf_44690_convex_optm_rsz.svg",
+              name: "leaf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/teapot_53691_convex_optm_rsz.svg",
+              name: "teapot",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474366_calendar_diffvg_rsz.svg",
+              name: "474366_calendar",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474365_travel_diffvg_rsz.svg",
+              name: "474365_travel",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474353_favorite-file_diffvg_rsz.svg",
+              name: "474353_favorite-file",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474362_shop-for-rent_diffvg_rsz.svg",
+              name: "474362_shop-for-rent",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474370_crown-user_diffvg_rsz.svg",
+              name: "474370_crown-user",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474352_fiery_diffvg_rsz.svg",
+              name: "474352_fiery",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474364_system-notification_diffvg_rsz.svg",
+              name: "474364_system-notification",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6700/474351_information_diffvg_rsz.svg",
+              name: "474351_information",
+            },
+          ],
+        },
+        6731: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/camera_55738_convex_optm_rsz.svg",
+              name: "camera",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/German shepherd_43201_convex_optm_rsz.svg",
+              name: "German shepherd",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/flower_83030_convex_optm_rsz.svg",
+              name: "flower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/ice cream_48509_convex_optm_rsz.svg",
+              name: "ice cream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/laptop_39606_convex_optm_rsz.svg",
+              name: "laptop",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/compass_52348_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/apple_27589_convex_optm_rsz.svg",
+              name: "apple",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475620_music-box_diffvg_rsz.svg",
+              name: "475620_music-box",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475625_gold_diffvg_rsz.svg",
+              name: "475625_gold",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475560_noodle-house_diffvg_rsz.svg",
+              name: "475560_noodle-house",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475564_beer_diffvg_rsz.svg",
+              name: "475564_beer",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475605_dj_diffvg_rsz.svg",
+              name: "475605_dj",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475614_ui-china_diffvg_rsz.svg",
+              name: "475614_ui-china",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475563_drinks_diffvg_rsz.svg",
+              name: "475563_drinks",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6731/475566_fruit_diffvg_rsz.svg",
+              name: "475566_fruit",
+            },
+          ],
+        },
+        6900: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/cake_33996_convex_optm_rsz.svg",
+              name: "cake",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/boba_83071_convex_optm_rsz.svg",
+              name: "boba",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/grapes_80192_convex_optm_rsz.svg",
+              name: "grapes",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/schedule_83777_convex_optm_rsz.svg",
+              name: "schedule",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/A police car with flashing lights_47446_convex_optm_rsz.svg",
+              name: "A police car with flashing lights",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/bookshelf_63121_convex_optm_rsz.svg",
+              name: "bookshelf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/trophy_71440_convex_optm_rsz.svg",
+              name: "trophy",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/506700_sneakers_diffvg_rsz.svg",
+              name: "506700_sneakers",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/506703_stopwatch_diffvg_rsz.svg",
+              name: "506703_stopwatch",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/506711_carrot_diffvg_rsz.svg",
+              name: "506711_carrot",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6900/506704_ball_diffvg_rsz.svg",
+              name: "506704_ball",
+            },
+          ],
+        },
+        6362: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/motorcycle_63589_convex_optm_rsz.svg",
+              name: "motorcycle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/An erupting volcano, aerial view_14177_convex_optm_rsz.svg",
+              name: "An erupting volcano, aerial view",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/A pig wearing a backpack_91606_convex_optm_rsz.svg",
+              name: "A pig wearing a backpack",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/Superhero_55763_convex_optm_rsz.svg",
+              name: "Superhero",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/chair_92684_convex_optm_rsz.svg",
+              name: "chair",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/bee flower_17859_convex_optm_rsz.svg",
+              name: "bee flower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/tennis court_74812_convex_optm_rsz.svg",
+              name: "tennis court",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425134_calendar-date-and_diffvg_rsz.svg",
+              name: "425134_calendar-date-and",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425189_flash-sale-ecommerce_diffvg_rsz.svg",
+              name: "425189_flash-sale-ecommerce",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425125_fashion-woman_diffvg_rsz.svg",
+              name: "425125_fashion-woman",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425155_phone-call-essential_diffvg_rsz.svg",
+              name: "425155_phone-call-essential",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425169_shoes-fashion-ecommerce_diffvg_rsz.svg",
+              name: "425169_shoes-fashion-ecommerce",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425210_gift-ecommerce-shopmarket_diffvg_rsz.svg",
+              name: "425210_gift-ecommerce-shopmarket",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425135_calculate-calculator-ecommerce_diffvg_rsz.svg",
+              name: "425135_calculate-calculator-ecommerce",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6362/425184_beauty-lotion-ecommerce_diffvg_rsz.svg",
+              name: "425184_beauty-lotion-ecommerce",
+            },
+          ],
+        },
+        6821: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/castle_55563_convex_optm_rsz.svg",
+              name: "castle",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/train_11775_convex_optm_rsz.svg",
+              name: "train",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/flower_13271_convex_optm_rsz.svg",
+              name: "flower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/vase_40612_convex_optm_rsz.svg",
+              name: "vase",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/A bumblebee sitting on a pink flower_50742_convex_optm_rsz.svg",
+              name: "A bumblebee sitting on a pink flower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/Sydney Opera House_47139_convex_optm_rsz.svg",
+              name: "Sydney Opera House",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/ladder_39602_convex_optm_rsz.svg",
+              name: "ladder",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493797_compass_diffvg_rsz.svg",
+              name: "493797_compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493766_come-on_diffvg_rsz.svg",
+              name: "493766_come-on",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493789_starfish_diffvg_rsz.svg",
+              name: "493789_starfish",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493778_cable-car_diffvg_rsz.svg",
+              name: "493778_cable-car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493760_helicopter_diffvg_rsz.svg",
+              name: "493760_helicopter",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493775_surfboard_diffvg_rsz.svg",
+              name: "493775_surfboard",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6821/493782_backpack_diffvg_rsz.svg",
+              name: "493782_backpack",
+            },
+          ],
+        },
+        5403: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/police car_23190_convex_optm_rsz.svg",
+              name: "police car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/titanic_69330_convex_optm_rsz.svg",
+              name: "titanic",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/tree_66386_convex_optm_rsz.svg",
+              name: "tree",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/spaceship_95381_convex_optm_rsz.svg",
+              name: "spaceship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/German shepherd_20252_convex_optm_rsz.svg",
+              name: "German shepherd",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/house_43025_convex_optm_rsz.svg",
+              name: "house",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/peacock_72575_convex_optm_rsz.svg",
+              name: "peacock",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/317007_egg_diffvg_rsz.svg",
+              name: "317007_egg",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/317000_chicken_diffvg_rsz.svg",
+              name: "317000_chicken",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/316994_butterfly_diffvg_rsz.svg",
+              name: "316994_butterfly",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5403/317003_dog_diffvg_rsz.svg",
+              name: "317003_dog",
+            },
+          ],
+        },
+        1944: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/castle_80349_convex_optm_rsz.svg",
+              name: "castle",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/ancient village_40246_convex_optm_rsz.svg",
+              name: "ancient village",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/avocados_63217_convex_optm_rsz.svg",
+              name: "avocados",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/koala_22958_convex_optm_rsz.svg",
+              name: "koala",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/erupting volcano_48772_convex_optm_rsz.svg",
+              name: "erupting volcano",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/fox_66061_convex_optm_rsz.svg",
+              name: "fox",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/Eiffel Tower_83708_convex_optm_rsz.svg",
+              name: "Eiffel Tower",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/1203885_cocktail_diffvg_rsz.svg",
+              name: "1203885_cocktail",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/1203874_airplane_diffvg_rsz.svg",
+              name: "1203874_airplane",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/1203877_bracelet_diffvg_rsz.svg",
+              name: "1203877_bracelet",
+            },
+            {
+              file_path:
+                "./svg_files_final/iconfont_1944/1203902_pamela_diffvg_rsz.svg",
+              name: "1203902_pamela",
+            },
+          ],
+        },
+        6229: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/oak tree_22156_convex_optm_rsz.svg",
+              name: "oak tree",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/cottage_30614_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/bookshelf_30345_convex_optm_rsz.svg",
+              name: "bookshelf",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/cottage_30613_convex_optm_rsz.svg",
+              name: "cottage",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/camping tent_50934_convex_optm_rsz.svg",
+              name: "camping tent",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/compass_40827_convex_optm_rsz.svg",
+              name: "compass",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/smartphone_49299_convex_optm_rsz.svg",
+              name: "smartphone",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421645_burger-fast-food_diffvg_rsz.svg",
+              name: "421645_burger-fast-food",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421642_beverage-breakfast-drink-2_diffvg_rsz.svg",
+              name: "421642_beverage-breakfast-drink-2",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421637_barbecue-barbeque-bbq_diffvg_rsz.svg",
+              name: "421637_barbecue-barbeque-bbq",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421638_cake-cup-dessert_diffvg_rsz.svg",
+              name: "421638_cake-cup-dessert",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421633_food-foods-japanese_diffvg_rsz.svg",
+              name: "421633_food-foods-japanese",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421622_breakfast-dessert-food_diffvg_rsz.svg",
+              name: "421622_breakfast-dessert-food",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6229/421643_beer-beverage-bottle_diffvg_rsz.svg",
+              name: "421643_beer-beverage-bottle",
+            },
+          ],
+        },
+        6820: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/bus_34139_convex_optm_rsz.svg",
+              name: "bus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/ice cream_75318_convex_optm_rsz.svg",
+              name: "ice cream",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/dog car_56514_convex_optm_rsz.svg",
+              name: "dog car",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/ship_82708_convex_optm_rsz.svg",
+              name: "ship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/apple_19919_convex_optm_rsz.svg",
+              name: "apple",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/clock tower_70673_convex_optm_rsz.svg",
+              name: "clock tower",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/trophy_32983_convex_optm_rsz.svg",
+              name: "trophy",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/493742_train_diffvg_rsz.svg",
+              name: "493742_train",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/493747_plane_diffvg_rsz.svg",
+              name: "493747_plane",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/493749_ship_diffvg_rsz.svg",
+              name: "493749_ship",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_6820/493741_telpher_diffvg_rsz.svg",
+              name: "493741_telpher",
+            },
+          ],
+        },
+        5807: {
+          random_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/A bamboo ladder propped up against an oak tree_24416_convex_optm_rsz.svg",
+              name: "A bamboo ladder propped up against an oak tree",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/bus_15893_convex_optm_rsz.svg",
+              name: "bus",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/dog_90283_convex_optm_rsz.svg",
+              name: "dog",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/robot_99753_convex_optm_rsz.svg",
+              name: "robot",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/robot_99756_convex_optm_rsz.svg",
+              name: "robot",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/beer_41359_convex_optm_rsz.svg",
+              name: "beer",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/cello_28516_convex_optm_rsz.svg",
+              name: "cello",
+            },
+          ],
+          ref_svgs: [
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/384599_cafe-cup-drink-mug-tea_diffvg_rsz.svg",
+              name: "384599_cafe-cup-drink-mug-tea",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/384610_app-hotel-journey-service-travel_diffvg_rsz.svg",
+              name: "384610_app-hotel-journey-service-travel",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/384633_comfortable-fabric-footwear-shoe-slipper_diffvg_rsz.svg",
+              name: "384633_comfortable-fabric-footwear-shoe-slipper",
+            },
+            {
+              file_path:
+                "./svg_files_final/svgrepo_5807/384622_alert-attention-caution-dangerous-warning_diffvg_rsz.svg",
+              name: "384622_alert-attention-caution-dangerous-warning",
+            },
+          ],
+        },
+      };
+
+      const itemsPerPage = 5; // 每页显示的项目数
+      let currentPage = 1; // 当前页
+
+      // 假设你已经将生成的JSON文件文件放置在当前目录下（例如：./svg_files.json）
+      // fetch('./svg_files_retrieve.json')  // 读取JSON文件
+      //     .then(response => response.json())
+      //     .then(data => {
+      //         svgData = data;  // 将数据存储到 svgData 中
+      //         renderPage(currentPage);
+      //         setupPagination(Object.keys(svgData).length);  // 计算总页数
+      //     })
+      //     .catch(error => console.error('Error loading SVG files:', error));
+
+      renderPage(currentPage);
+      setupPagination(Object.keys(svgData).length);
+
+      // 渲染当前页的数据
+      function renderPage(page) {
+        const container = document.getElementById("container");
+        container.innerHTML = ""; // 清空当前内容
+
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = page * itemsPerPage;
+
+        // 获取当前页的数据
+        const currentData = Object.keys(svgData).slice(startIndex, endIndex);
+
+        currentData.forEach((cid) => {
+          const randomSvgs = svgData[cid].random_svgs;
+          const refSvgs = svgData[cid].ref_svgs;
+
+          const row = document.createElement("div");
+          row.classList.add("row");
+
+          // 左侧：Reference SVGs
+          const leftPanelWrapper = document.createElement("div");
+          leftPanelWrapper.classList.add("left-panel-wrapper");
+          const leftTitle = document.createElement("div");
+          leftTitle.classList.add("panel-title");
+          leftTitle.textContent = "Reference Style";
+          const leftPanel = document.createElement("div");
+          leftPanel.classList.add("panel", "left-panel");
+          leftPanelWrapper.appendChild(leftTitle);
+          leftPanelWrapper.appendChild(leftPanel);
+
+          // 显示 Reference SVGs（最多4个）
+          let refCounter = 0;
+          while (refCounter < 4) {
+            const svgItem = document.createElement("div");
+            svgItem.classList.add("svg-item");
+            if (refCounter < refSvgs.length) {
+              svgItem.innerHTML = `
+                            <img src="./${refSvgs[refCounter].file_path}" alt="${refSvgs[refCounter].name}">
+                        `;
+            }
+            leftPanel.appendChild(svgItem);
+            refCounter++;
+          }
+
+          // 右侧：Customized SVGs
+          const rightPanelWrapper = document.createElement("div");
+          rightPanelWrapper.classList.add("right-panel-wrapper");
+          const rightTitle = document.createElement("div");
+          rightTitle.classList.add("panel-title");
+          rightTitle.textContent = "Customized SVGs";
+          const rightPanel = document.createElement("div");
+          rightPanel.classList.add("panel", "right-panel");
+          rightPanelWrapper.appendChild(rightTitle);
+          rightPanelWrapper.appendChild(rightPanel);
+
+          randomSvgs.forEach((file) => {
+            const svgItem = document.createElement("div");
+            svgItem.classList.add("svg-item");
+            svgItem.innerHTML = `
+                        <img src="./${file.file_path}" alt="${file.name}">
+                        <div class="text-item">${file.name}</div>
+                    `;
+            rightPanel.appendChild(svgItem);
+          });
+
+          row.appendChild(leftPanelWrapper);
+          row.appendChild(rightPanelWrapper);
+          container.appendChild(row);
+        });
+      }
+
+      // 设置分页按钮
+      function setupPagination(totalItems) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = ""; // 清空现有的分页按钮
+
+        const totalPages = Math.ceil(totalItems / itemsPerPage); // 计算总页数
+
+        // 添加上一页按钮
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Previous";
+        prevButton.disabled = currentPage === 1; // 如果是第一页，禁用上一页按钮
+        prevButton.onclick = () => changePage(currentPage - 1);
+        pagination.appendChild(prevButton);
+
+        // 添加页码按钮
+        for (let i = 1; i <= totalPages; i++) {
+          const pageButton = document.createElement("button");
+          pageButton.textContent = i;
+          pageButton.disabled = currentPage === i; // 当前页不可点击
+          pageButton.onclick = () => changePage(i);
+          pagination.appendChild(pageButton);
+        }
+
+        // 添加下一页按钮
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Next";
+        nextButton.disabled = currentPage === totalPages; // 如果是最后一页，禁用下一页按钮
+        nextButton.onclick = () => changePage(currentPage + 1);
+        pagination.appendChild(nextButton);
+      }
+
+      // 改变页面
+      function changePage(page) {
+        if (
+          page < 1 ||
+          page > Math.ceil(Object.keys(svgData).length / itemsPerPage)
+        )
+          return;
+        currentPage = page;
+        renderPage(currentPage);
+        setupPagination(Object.keys(svgData).length);
+      }
+    </script>
+  </body>
+</html>
